@@ -1,0 +1,117 @@
+<!-- A simple random walk, implemented in JavaScript. -->
+<!-- https://en.wikipedia.org/wiki/Random_walk -->
+
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>
+			Random Walk
+		</title>
+		<link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
+		<style type="text/css">
+			* {
+				margin: 0px;
+				padding: 0px;
+
+				user-select: none;
+				outline: none;
+				font-family: "Roboto";
+			}
+			body {
+				width: 100%;
+				height: 100%;
+			}
+			#canvas {
+				width: 100%;
+				height: 100%;
+
+				location: absolute;
+				z-index: 0;
+			}
+			#information {
+				background-color: #000;
+
+				width: 50%;
+				height: 50%;
+
+				location: absolute;
+				z-index: 1;
+			}
+		</style>
+	</head>
+	<body>
+		<div id="information">
+			<h1>Iteration</h1>
+		</div>
+		<canvas id="canvas" width="512" height="512"></canvas>
+		<script type="text/javascript">
+
+			// Create variable to store HTML canvas element
+			canvas = document.getElementById("canvas");
+			// Get rendering context for canvas and store it in a variable, "context"
+			context = canvas.getContext("2d");
+			// Set canvas width to be equal to window width
+			context.canvas.width = window.innerWidth;
+			// Set canvas height to be equal to window height
+			context.canvas.height = window.innerHeight;
+
+			var currentLocation = {
+				x: 0,
+				y: 0
+			};
+			var locations = [];
+			locations.push(JSON.parse(JSON.stringify(currentLocation)));
+			var averageLocation = {
+				x: 0,
+				y: 0
+			};
+
+			// Set canvas line rendering width to 1 pixel
+			context.lineWidth = 1;
+
+			function update() {
+				// Run 50 iterations of the random walk algorithm for each timestep; this increases efficiency when performing a large number of computations
+				for (var i = 0; i < 50; i ++) {
+					//
+					currentLocation.x += Math.round(((Math.random() * 10) - 5));
+					currentLocation.y += Math.round(((Math.random() * 10) - 5));
+
+					context.strokeStyle = "hsla("+ Math.round(locations.length / 100) +", 100%, 50%, 0.2)";
+
+					// A new path must be created for each iteration so that the entire path's color is not replaced with the color of the current iteration; this also helps with efficiency by preventing the whole path from needing to be re-rendered
+					// Begin a new path on the HTML canvas
+					context.beginPath();
+					// Set the starting point for this path to the current location, with canvas size offset
+					context.moveTo(
+						locations[locations.length - 1].x + Math.round(canvas.width / 2), locations[locations.length - 1].y + Math.round(canvas.height / 2)
+					);
+					context.lineTo(
+						currentLocation.x + Math.round(canvas.width / 2),
+						currentLocation.y + Math.round(canvas.height / 2)
+					);
+					// Render the path
+					context.stroke();
+
+					// Add current location to locations array
+					// Use JSON.stringify and JSON.parse to create a clone of the current location; this must be done so that the recorded locations are not altered when the current location changes
+					locations.push(JSON.parse(JSON.stringify(currentLocation)));
+
+					// Calculate average location
+					// Reset average x and y location values to 0
+					averageLocation.x = 0;
+					averageLocation.y = 0;
+					// Loop through each location value in array
+					for (var j = 0; j < locations.length; j ++) {
+						// Add current x and y location values, divided by the total number of values, to the average Location
+						averageLocation.x += locations[j].x / locations.length;
+						averageLocation.y += locations[j].y / locations.length;
+					}
+				}
+			}
+
+			// Execute update function on a 1-millisecond interval - this will be executed as fast as the user's computer will allow, up to once a millisecond
+			var interval = window.setInterval(update, 1);
+
+		</script>
+	</body>
+</html>
